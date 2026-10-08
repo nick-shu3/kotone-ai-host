@@ -1,0 +1,53 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+credentials*.json
+secrets*.json
+api-key*
+api_key*
+# Generated/user content, including actual browser export names
+output/
+user-data/
+downloads/
+fgo-interview*.txt
+kotone-interview*.txt
+*.wav
+*.mp4
+*.srt
+script.txt
+meta.json
+*.log
+thumbnail.png
+*.zip
+*.bak
+*.tmp
+# Personal avatar: review redistribution rights before adding explicitly
+presenter.png
+# Python / OS / editor
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Native downloads and Windows self-test results
+runtime/
+release/
+WINDOWS_CHECK_RESULT.json
+*.exe
+*.dll
+*.whl
+.windows-check-*
