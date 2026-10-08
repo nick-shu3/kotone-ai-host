@@ -280,7 +280,19 @@ class SecurityTests(unittest.TestCase):
     def test_windows_parent_rename_blocked(self):
         jid,folder=self.media_job()
         with s.video.storage.directory(s.ROOT,folder):
-            with self.assertRaises(OSError):folder.rename(folder.with_name('swapped'))
+            # Check both the job and its ancestor, with a sharing violation
+            # specifically (an unrelated ACL denial must not pass this test).
+            for target in (folder, folder.parent):
+                with self.subTest(target=target.name):
+                    with self.assertRaises(OSError) as error:
+                        target.rename(target.with_name('swapped'))
+                    self.assertEqual(error.exception.winerror, 32)
+            self.assertEqual((folder/'script.txt').read_bytes(), b'AUDIT_SENTINEL')
+        # Releasing the handles must restore normal rename behavior.
+        renamed = folder.with_name('swapped')
+        folder.rename(renamed)
+        renamed.rename(folder)
+        self.assertEqual((folder/'script.txt').read_bytes(), b'AUDIT_SENTINEL')
 
     def test_render_capacity_failure_cleans_temp_preserves_final(self):
         import wave
