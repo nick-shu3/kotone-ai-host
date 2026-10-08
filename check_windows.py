@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -27,9 +28,15 @@ def run():
         stderr=subprocess.DEVNULL, env=env, timeout=15, check=True).stdout.splitlines()[0].decode('utf-8','replace')
     if not version.startswith('ffmpeg version 9.0.2'):
         raise ValueError('動画変換部品のバージョンが一致しません。')
+    print('Windows回帰テストを実行中です（実API送信なし）。', flush=True)
     suite = subprocess.run([sys.executable, '-I', '-B', str(ROOT/'tests/test_security.py')],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env, timeout=120)
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, env=env, timeout=120)
     if suite.returncode:
+        # Only expose validated test identifiers, never raw tracebacks/paths.
+        failures = re.findall(rb'^(?:FAIL|ERROR): (test_[A-Za-z0-9_]+)\b',
+                              suite.stderr, re.MULTILINE)
+        for name in sorted(set(failures)):
+            print('失敗項目: ' + name.decode('ascii'))
         raise ValueError('回帰テストが失敗しました。公開を保留してください。')
     with tempfile.TemporaryDirectory(prefix='kotone-check-') as temporary:
         server.ROOT = Path(temporary)

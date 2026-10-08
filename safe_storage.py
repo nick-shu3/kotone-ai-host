@@ -27,8 +27,12 @@ def _windows_api():
 
 def _windows_handle(path, directory=False):
     k, w = _windows_api()
-    # Deny deletion/rename for directories and deny writes for media files.
-    handle = k.CreateFileW(str(path), 0x80 if directory else 0x80000000,
+    # Attribute-only handles do not participate in the read/write/delete
+    # sharing checks. FILE_LIST_DIRECTORY (same bit as FILE_READ_DATA) makes
+    # the directory handle enforce the omitted FILE_SHARE_DELETE permission.
+    # Keep read/write sharing so normal child-file operations remain possible.
+    directory_access = 0x00000001 | 0x00000080
+    handle = k.CreateFileW(str(path), directory_access if directory else 0x80000000,
                            3 if directory else 1, None, 3,
                            0x00200000 | (0x02000000 if directory else 0), None)
     if handle == ctypes.c_void_p(-1).value:

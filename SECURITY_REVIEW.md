@@ -1,6 +1,22 @@
+# v0.3.4 Windowsフォルダー保護の修正記録
+
+2026-10-08：v0.3.3のWindows実機回帰テストは31成功・1失敗・5未実施。test_windows_parent_rename_blockedで名前変更が成功してしまい、共有削除拒否の前提が成立していないことが判明しました。下記のv0.3.3記録をWindowsの実証と扱わないでください。
+
+修正：ディレクトリをFILE_READ_ATTRIBUTESのみからFILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTESへ変更。共有モードはFILE_SHARE_READ | FILE_SHARE_WRITEのままでFILE_SHARE_DELETEを許可しません。リパースポイント拒否、全祖先ハンドル保持、ACL、通常権限限定、メディア検査は維持。アクセス権不足時に属性のみのハンドルへフォールバックしません。
+
+テスト：ジョブ・親の名前変更に共有違反32を要求し、ハンドル解除後の名前変更成功と原稿内容保持も検査。Windowsチェッカーは正規表現で抽出した失敗テスト識別子のみ表示し、生のパス・例外を出しません。
+
+こちらのLinux検証は37件中36成功・Windows限定1件未実施。2026-10-08、利用者が修正版を適用したWindows実機のcheck_windows.bat PASS画面を確認しました。実APIを使用する紹介原稿・音声作成とMP4書き出しの完了報告を受け、提供されたMP4（144.21秒、1280×720、24fps、H.264/AAC）の全体デコードはエラーなし。2秒・72秒・142秒の画像で表示と2行以内の字幕を確認しました。これらは利用者実機の自己検証と提出物の確認であり、独立した認証ではありません。Windowsテストの個別件数・スキップ件数は今回のPASS画面からは取得していません。音声の自然さと字幕同期の聴取確認、全内蔵依存のCVEクリアランス、他のWindows環境の検証は未完了です。未知の脆弱性や同一ユーザー権限マルウェアへの耐性を保証しません。
+
+参考：Microsoft CreateFileW dwShareModeおよびFile Access Rights Constants。
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew
+https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants
+
+---
+
 # 修正・公開準備の検証記録 — v0.3.3
 
-この文書はGitHub登録前に作成した検証・準備記録です。登録後もWindows実機の未検証状態は変わりません。
+この文書はGitHub登録前に作成した検証・準備記録です。以降はv0.3.3登録前の履歴であり、現在の状態は冒頭のv0.3.4記録を参照してください。
 日付：2026-10-08（日本）。v0.3.2を基にした実装検証であり、独立した第三者認証ではありません。外部への公開は行っていません。
 
 ## 今回の確認と対応
